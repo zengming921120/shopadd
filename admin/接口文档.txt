@@ -1,0 +1,46 @@
+服务器地址："http://localhost:8080";
+
+后台管理系统接口 '/admin'
+
+获取类别接口 
+url:"/type",
+method:get,
+req:null,
+res:{
+	state:1,
+	code:"ok",
+	data:[
+		{
+			_id:标识,
+			typeName:类别名称
+		}
+	]
+}
+
+图片上传
+url："/upfile",
+method:post,
+req:new FormData(),
+res:{
+	state:1,
+	code:"ok",
+	data:{
+		url:"xx",
+		size:
+	}
+}
+
+提交
+url:"/add",
+method:"post",
+req:{
+	goodsName:,
+	goodsType:,
+	typeId:,
+	goodsPrice:,
+	goodsLogo,
+}
+res{
+	state:1,
+	code:"ok",
+}

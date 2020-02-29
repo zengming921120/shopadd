@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+		<header>
+			<a href="login.html">登陆</a>
+			<a href="#" style="display: none;"></a>
+			<a href="car.html">购物车</a>
+		</header>
+		<ul>
+			
+		</ul>
+	</body>
+	<script src="js/jquery-1.10.2.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+		$(function(){
+			let $as = $("header").children();
+			if(localStorage.userName && localStorage.tokenID && localStorage.userID){
+				$as.eq(0).hide()
+				$as.eq(1).html(localStorage.userName).show()
+			}else{
+				$as.eq(0).show()
+				$as.eq(1).html("").hide()
+			}
+			$.get("/index/goods",function(res){
+				if(res.state == 1){
+					let arr = res.data;
+					let str = ``;
+					for(var i = 0 ; i < arr.length ; i++){
+						str += `
+							<li>
+								<img src="${arr[i].goodsLogo}" alt="">
+								<h2>商品名称：${arr[i].goodsName}</h2>
+								<P>商品单价：￥${arr[i].goodsPrice}</P>
+								<button onclick="addShopCar('${arr[i]._id}')">添加至购物车</button>
+							</li>
+						`
+					}
+					$("ul").html(str);
+				}
+			})
+			
+		})
+		function addShopCar(id){
+			if(localStorage.tokenID&&localStorage.userName&&localStorage.userID){
+				$.ajax({
+					url:"/power/addCar",
+					type:"post",
+					data:{
+						userID:localStorage.userID,
+						goodsID:id,
+						count:1
+					},
+					headers:{
+						"authorization":localStorage.tokenID
+					},
+					success:function(res){
+						console.log(res)
+					},
+					error:function(xhr,err,status){
+						let bol = confirm("用户身份验证出错，请重新登陆")
+						if(bol){
+							location.href = "login.html";
+						}else{
+							return ;
+						}
+					}
+				})
+			}else{
+				let bol = confirm("用户信息丢失，请重新登陆")
+				if(bol){
+					location.href = "login.html";
+				}else{
+					return ;
+				}
+			}
+		}
+		
+		
+		
+	</script>
+</html>

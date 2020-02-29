@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			*{
+				margin: 0;
+				padding: 0;
+			}
+			html,body{
+				width:100%;
+				height:100%;
+				background: cornflowerblue;
+				position: relative;
+			}
+			
+			#box{
+				width: 300px;
+				height: 300px;
+				text-align: center;
+				position: absolute;
+				left: 0;
+				top: 0;
+				bottom: 0;
+				right:0;
+				margin: auto;
+				background: white;
+			}
+			button{
+				width: 150px;
+				
+			}
+			.btn1{
+				height: 40px;
+				background: #c9c9c9;
+				border: none;
+				float: left;
+				border-bottom: 1px solide #ccc;
+			}
+			.active{
+				background: white;
+			}
+			input{
+				width: 220px;
+				height: 40px;
+				margin-top: 30px;
+			}
+			#login{
+				height: 40px;
+				background: #6495ED;
+				border: 0;
+				margin: 30px auto;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="box">
+			<button class="btn1 active">登陆</button><button class="btn1">注册</button>
+			<div id="loginPage">
+				<input type="text" placeholder="请输入用户名">
+				<input type="text" placeholder="请输入密码">
+				<button id="login">登陆</button>
+			</div>
+			<div id="rejestPage" style="display: none;">
+				<input type="text" placeholder="请输入用户名">
+				<input type="text" placeholder="请输入密码">
+				<button id="rejest">注册</button>
+			</div>
+		</div>
+	</body>
+	<script src="js/jquery-1.10.2.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+		$(".btn1").click(function(){
+			$(this).prop("class","btn1 active").siblings(".btn1").prop("class","btn1")
+			$("#box div").eq($(this).index()).show().siblings("div").hide();
+		})
+		//判断用户名是否重复
+		$("#rejestPage input").eq(0).on("blur",function(){
+			if($(this).val() == ""){
+				alert("不能为空")
+			}else{
+				$.get('/user/repeat',{userName:$(this).val()},function(res){
+					if(res.state == 1){
+						alert("可以使用")
+					}else{
+						alert(res.code);
+					}
+				})
+			}
+		})
+		//注册
+		$("#rejest").click(function(){
+			$.post("/user/rejest",{
+				userName:$("#rejestPage input").eq(0).val(),
+				password:$("#rejestPage input").eq(1).val()
+			},function(res){
+				if(res.state == 1){
+					alert("注册成功")
+				}
+			})
+		})
+		//登陆
+		$("#login").click(function(){
+// 			$.post("/user/login",{
+// 				userName:$("#loginPage input").eq(0).val(),
+// 				password:$("#loginPage input").eq(1).val()
+// 			},function(res){
+// 				if(res.state == 1){
+// 					alert("登陆成功")
+// 					console.log(res)
+// 					for (let key in res.data) {
+// 						localStorage.setItem(key,res.data[key])
+// 					}
+// 					location.href="./home.html"
+// 				}else{
+// 					alert(res.code)
+// 				}
+// 			})
+			$.ajax({
+				url:"/user/login",
+				type:"post",
+				data:{
+					userName:$("#loginPage input").eq(0).val(),
+					password:$("#loginPage input").eq(1).val()
+				},
+				headers:{
+					contentType:undefined,
+				},
+				success:function(res){
+					if(res.state == 1){
+						alert("登陆成功")
+						console.log(res)
+						for (let key in res.data) {
+							localStorage.setItem(key,res.data[key])
+						}
+						location.href="./home.html"
+					}else{
+						alert(res.code)
+					}
+				}
+			})
+		})
+	</script>
+</html>

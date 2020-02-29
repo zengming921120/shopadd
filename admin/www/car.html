@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+	</body>
+	<script src="js/jquery-1.10.2.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+		
+		//获取购物车数据
+		function getCar(){
+			$.ajax({
+				url:"/power/shopCar",
+				type:"get",
+				data:{
+					userID:localStorage.userID,
+				},
+				headers:{
+					"authorization":localStorage.tokenID
+				},
+				success:function(res){
+					console.log(res)
+				},
+				error:function(xhr,err,status){
+					let bol = confirm("用户身份验证出错，请重新登陆")
+					if(bol){
+						location.href = "login.html";
+					}else{
+						return ;
+					}
+				}
+			})
+		}
+		getCar()
+	</script>
+</html>

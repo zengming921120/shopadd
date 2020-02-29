@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			td,th{
+				padding: 5px 10px;
+				border: 1px solid black;
+			}
+			img{width: 50px;height: 50px;}
+		</style>
+	</head>
+	<body>
+		<h1>商品后台管理系统</h1>
+		<input type="text" placeholder="请输入商品名称"><span></span><br>
+		<input type="text" placeholder="请输入商品单价" ><span></span><br>
+		<select name="" id="type" placeholder="请选择商品种类"><span></span><br>
+			
+		</select>
+		<form id="form1">
+			<input type="file" placeholder="请选择图片" name="file"><br>
+		</form>
+		<img id="logo" src="" alt="">
+		<button id="btn">提交</button>
+		<table cellpadding="0" cellspacing="0">
+			<thead>
+				<tr>
+					<th>序号</th>
+					<th>商品样图</th>
+					<th>商品名称</th>
+					<th>商品单价</th>
+					<th>商品种类</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>1</td>
+					<td><img src="" alt=""></td>
+					<td><span></span></td>
+					<td>7888</td>
+					<td>电子产品</td>
+					<td><a href="#">删除</a></td>
+				</tr>
+			</tbody>
+		</table>
+	</body>
+	<script src="js/jquery-1.10.2.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			//获取类别
+			$.get("/admin/type",function(res){
+				console.log(res)
+				if(res.state == 1){
+					let str = `<option value="0">请选择</option>`;
+					for (let i = 0 ; i < res.data.length ; i++) {
+						str+=`<option value="${res.data[i]._id+'_'+res.data[i].typeName}">${res.data[i].typeName}</option>`
+					}
+					$("#type").html(str);
+				}
+			})
+			//文件上传
+			$("input:file").on("change",function(){
+				$.ajax({
+					url:"/admin/upFile",
+					type:"post",
+					data:new FormData($("#form1")[0]),
+					async:false,
+					cache:false,
+					contentType:false,
+					processData:false,
+					success:function(res){
+						console.log(res)
+						if(res.state==1){
+							$("#logo").prop("src",res.fileData.url);
+						}
+					}
+				})
+			})
+			//提交商品
+			$("#btn").click(function(){
+				let sel = $("select").val();
+				let arr= sel.split("_");
+				$.post("/admin/add",{
+					goodsName:$("input").eq(0).val(),
+					goodsPrice:$("input").eq(1).val(),
+					goodsType:arr[1],
+					typeID:arr[0],
+					goodsLogo:$("#logo").prop("src")
+				},function(res){
+					console.log(res);
+					getGoods()
+				})
+			})
+			
+			getGoods()
+			//点击修改项生产对应输入框或下拉框
+			$("table").on("click",".resetable1>span",function(){
+				$(this).parent().html(`<input class="updateGoodsName" type="text" value="${$(this).html()}" autofocus />`)
+			})
+			$("table").on("click",".resetable2>span",function(){
+				$(this).parent().html(`<input class="updateGoodsPrice" type="text" value="${$(this).html()}" autofocus />`)
+			})
+			$("table").on("click",".resetable3>span",function(){
+				let goodsType = $(this).text();
+				let typeID = $(this).attr("_id");
+				let $that = $(this);
+				$.get("/admin/type",function(res){
+					console.log(res)
+					if(res.state == 1){
+						let str = `<option value="0">请选择</option>`;
+						for (let i = 0 ; i < res.data.length ; i++) {
+							str+=`<option value="${res.data[i]._id+'_'+res.data[i].typeName}">${res.data[i].typeName}</option>`
+						}
+						$select = $(`<select class='updateGoodsType'></select>`);
+						$select.html(str);
+						$that.parent().html($select)
+						$select.val(typeID+"_"+goodsType)
+					}
+				})
+			})
+			//输入框或下拉框失去焦点时  进行数据修改  提交接口
+			$("table").on("change",".updateGoodsName",function(){
+				let id = $(this).parents("tr").attr("_id");
+				$.post("/admin/update/"+id,{goodsName:$(this).val()},function(res){
+					if(res.state == 1){
+						getGoods()
+					}
+				})
+			})
+			$("table").on("change",".updateGoodsPrice",function(){
+				let id = $(this).parents("tr").attr("_id");
+				$.post("/admin/update/"+id,{goodsPrice:$(this).val()},function(res){
+					if(res.state == 1){
+						getGoods()
+					}
+				})
+			})
+			$("table").on("change",".updateGoodsType",function(){
+				let id = $(this).parents("tr").attr("_id");
+				let arr = $(this).val().split("_");
+				let typeID=arr[0];
+				let goodsType = arr[1];
+				$.post("/admin/update/"+id,{typeID:typeID,goodsType:goodsType},function(res){
+					if(res.state == 1){
+						getGoods()
+					}
+				})
+			})
+		})
+		//获取商品
+		function getGoods(){
+			$.get("/admin/shop",function(res){
+				console.log(res)
+				let str = '';
+				for(let i = 0 ; i < res.data.length ; i++){
+					str+=`
+						<tr _id="${res.data[i]._id}">
+							<td>${i+1}</td>
+							<td><img src="${res.data[i].goodsLogo}" alt=""></td>
+							<td class="resetable1"><span>${res.data[i].goodsName}</span></td>
+							<td class="resetable2"><span>${res.data[i].goodsPrice}</span></td>
+							<td class="resetable3"><span _id="${res.data[i].typeID}">${res.data[i].goodsType}</span></td>
+							<td><a href="#" onclick="del('${res.data[i]._id}')">删除</a></td>
+						</tr>
+					`
+				}
+				$("tbody").html(str)
+			})
+		}
+		//删除
+		function del (id){
+			$.post("/admin/del",{id:id},function(res){
+				if(res.state == 1){
+					getGoods()
+				}
+			})
+		}
+		
+	</script>
+</html>

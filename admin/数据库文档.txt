@@ -1,0 +1,15 @@
+数据库名：shop
+
+类别集合：typeList
+_id:自动添加唯一标识
+typeName:类别名称
+
+商品集合：goodsList
+_id:本条商品的id，唯一标识
+goodsName:商品名称,
+goodsPrice:商品单价,
+goodsType:商品种类,
+typeID:商品种类的id,
+goodsLogo:商品图片,
+goodsTime:上架时间
+
